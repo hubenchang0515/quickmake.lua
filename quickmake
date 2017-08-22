@@ -1,0 +1,201 @@
+#!/usr/bin/env lua
+
+local success      = true            -- if check library success
+local finalOutput  = "\n[ERRORS]\n"  -- errors
+
+local compiler = "gcc "           -- C compiler
+local flags    = " -O2 -W -Wall -fPIC "
+local rules     = {}
+local libs     = {}
+local files    = {}
+local objs     = {}
+
+-- print result
+function display()
+	for i,v in pairs(libs) do 
+		print(v)
+	end
+	for i,v in pairs(files) do 
+		print(v)
+	end
+	for i,v in pairs(objs) do 
+		print(v)
+	end
+	for i,v in pairs(rules) do
+		print(v.target .. " : " .. v.depend)
+		print("\t" .. v.cmd)
+	end
+end
+
+-- Execute cmd without output
+function execute(cmd)
+	return os.execute(cmd .. " > /dev/null 2>&1")
+end
+
+-- file to obj
+function object(file)
+	local obj = string.reverse(file)
+	local len = string.len(file) - string.find(obj,".",1,true)
+	obj = string.sub(file,1,len);
+	obj = obj .. ".o"
+	
+	return obj
+end
+
+-- Add str to final output
+function addFinal(str)
+	finalOutput = finalOutput .. str .. "\n"
+end
+
+-- check if lib exist
+function checkLib(lib)
+	local libfile = "lib" .. lib
+	
+	io.write("Check " .. libfile)
+	if execute("ld -l " .. lib)  then
+		print(" --- Ok. ")
+	else
+		print(" --- Unfound.")
+		addFinal("Cannot find " .. libfile )
+		success = false
+	end
+end
+
+-- check if file exist 
+function checkFile(file)
+	io.write("Check " .. file)
+	local f = io.open(file)
+	if f then
+		print(" --- Ok.")
+		f:close()
+	else
+		print(" --- Unfound.")
+		addFinal("Cannot find " .. file )
+		success = false
+	end
+end
+
+-- Build Makefile
+function buildMakefile()
+	mk = io.open("Makefile","w+")
+	
+	-- link .o ro target
+	for i,rule in pairs(rules) do
+		local cmd = rule.cmd
+		if rule.ttype ~= TARGET.A then
+			for i,v in pairs(libs) do
+				cmd = cmd .. " -l" .. v 
+			end
+		end
+		mk:write(rule.target .. " : " .. rule.depend .. "\n")
+		mk:write("\t" .. cmd .. "\n\n")
+	end
+	
+	-- compile .c .cpp to .o
+	for i,file in pairs(files) do
+		local cmd = compiler .. flags .. " -M " .. file
+		if execute(cmd) then
+			fp = io.popen(cmd)
+			mk:write(fp:read("a"))
+			cmd = compiler .. flags .. " -c " .. file
+			mk:write("\t" .. cmd .. "\n\n")
+		else
+			print(" --- Failed.\n")
+		end
+	end
+	
+	-- clean
+	mk:write(".PHONY : clean\n\n")
+	mk:write("clean : \n")
+	mk:write("\trm ")
+	for i,obj in pairs(objs) do
+		mk:write(obj .. " ")
+	end
+	
+	mk:close()
+	print(" --- Success.")
+end
+
+
+
+
+
+--[=====[ INSTRUCTIONS ]=====]--
+
+-- set compiler 
+function SetCompiler(str)
+	compiler = str .. " "
+end
+
+-- set flags
+function SetFlags(str)
+	flags = str .. " "
+end
+
+-- Add lib
+function AddLib(lib)
+	table.insert(libs,lib)
+end
+
+-- Add source files
+function AddFile(file)
+	table.insert(files,file);
+	table.insert(objs,object(file))
+end
+
+-- Set target
+SetTarget = {}
+TARGET = {OUT = 0, SO = 1, A = 2}
+function SetTarget.OUT(target,depend)
+	local cmd = compiler .. flags .. "-o " .. target .. " " .. depend
+	local rule = {target = target, depend = depend, cmd = cmd,ttype = TARGET.OUT}
+	table.insert(rules,rule)
+end
+
+function SetTarget.SO(target,depend)
+	local cmd = compiler .. flags .. "-o " .. target .. " " .. depend
+	local rule = {target = target, depend = depend, cmd = cmd,ttype = TARGET.SO}
+	table.insert(rules,rule)
+end
+
+function SetTarget.A(target,depend)
+	local cmd ="ar rcs " .. target .. " " .. depend
+	local rule = {target = target, depend = depend, cmd = cmd,ttype = TARGET.A}
+	table.insert(rules,rule)
+end
+
+
+
+
+
+
+-- START --
+
+-- if has no argument
+if #arg ~= 1 then
+	print("Usage : quickmake <filename> ")
+	print("      - quickmake make.lua ")
+	os.exit(1)
+end
+
+-- execute script
+dofile(arg[1])
+
+-- check Libs
+for i,v in pairs(libs) do
+	checkLib(v)
+end
+
+-- check file
+for i,v in pairs(files) do
+	checkFile(v)
+end
+
+if success then
+	io.write("\nGenerate Makefile ")
+	buildMakefile()
+	--display()
+else
+	print(finalOutput)
+end
+
