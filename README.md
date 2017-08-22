@@ -4,7 +4,7 @@ A simple script of Lua used to generate Makefile
 ## Demo 
 ### Script make.lua
 ```Lua
--- filename : make.lua
+-- compiler and flags
 SetCompiler("clang++")
 SetFlags("-W -Wall -O2 -std=c++11")
 
@@ -23,7 +23,7 @@ SetTarget.OUT("main","main.o file1.o file2.o")
 ```
 ### Execute
 ```Shell
-$ quickmake make.lua  # generate Makefile
+$ quickmake make.lua 
 $ make
 ```
 
