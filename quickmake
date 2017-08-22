@@ -79,6 +79,12 @@ end
 function buildMakefile()
 	mk = io.open("Makefile","w+")
 	
+	mk:write("all : ")
+	for i,rule in pairs(rules) do
+		mk:write(rule.target .. " ")
+	end
+	mk:write("\n")
+	
 	-- link .o ro target
 	for i,rule in pairs(rules) do
 		local cmd = rule.cmd
@@ -105,7 +111,7 @@ function buildMakefile()
 	end
 	
 	-- clean
-	mk:write(".PHONY : clean\n\n")
+	mk:write(".PHONY : all clean\n\n")
 	mk:write("clean : \n")
 	mk:write("\trm ")
 	for i,obj in pairs(objs) do
@@ -143,22 +149,33 @@ function AddFile(file)
 	table.insert(objs,object(file))
 end
 
+-- Add source files
+function AddFiles(files)
+	string.gsub(files,"%g+",AddFile)
+end
+
 -- Set target
 SetTarget = {}
 TARGET = {OUT = 0, SO = 1, A = 2}
 function SetTarget.OUT(target,depend)
+	depend = string.gsub(depend,"\n","\\\n")
+	depend = string.gsub(depend,"\t"," ")
 	local cmd = compiler .. flags .. "-o " .. target .. " " .. depend
 	local rule = {target = target, depend = depend, cmd = cmd,ttype = TARGET.OUT}
 	table.insert(rules,rule)
 end
 
 function SetTarget.SO(target,depend)
+	depend = string.gsub(depend,"\n","\\\n")
+	depend = string.gsub(depend,"\t"," ")
 	local cmd = compiler .. flags .. "-shared -o " .. target .. " " .. depend
 	local rule = {target = target, depend = depend, cmd = cmd,ttype = TARGET.SO}
 	table.insert(rules,rule)
 end
 
 function SetTarget.A(target,depend)
+	depend = string.gsub(depend,"\n","\\\n")
+	depend = string.gsub(depend,"\t"," ")
 	local cmd ="ar rcs " .. target .. " " .. depend
 	local rule = {target = target, depend = depend, cmd = cmd,ttype = TARGET.A}
 	table.insert(rules,rule)

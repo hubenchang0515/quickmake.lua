@@ -1,24 +1,39 @@
 # quickmake.lua
 A simple script of Lua used to generate Makefile
 
-## Demo 
+## Demo : Generate Makeifle for Lua
 ### Script make.lua
 ```Lua
--- compiler and flags
-SetCompiler("clang++")
-SetFlags("-W -Wall -O2 -std=c++11")
 
--- libs depend , will be linked by -l
-AddLib("SDL2")
-AddLib("SDL2_image")
+-- Set compiler and flags
+SetCompiler("gcc")
+SetFlags("-O2 -W -Wall -fPIC -DLUA_USE_LINUX")
 
--- source files , will be compiled to .o
-AddFile("main.cpp")
-AddFile("file1.cpp")
-AddFile("file2.cpp")
+-- link libreadline libm and libdl
+AddLib("readline")
+AddLib("m")
+AddLib("dl")
 
--- set final target
-SetTarget.OUT("main","main.o file1.o file2.o")
+-- files
+AddFiles("lapi.c      lcorolib.c  ldump.c   llex.c      lopcodes.c  lstrlib.c  luac.c \
+		lauxlib.c   lctype.c    lfunc.c   lmathlib.c  loslib.c    ltable.c   lundump.c \
+		lbaselib.c  ldblib.c    lgc.c     lmem.c      lparser.c   ltablib.c  lutf8lib.c \
+		lbitlib.c   ldebug.c    linit.c   loadlib.c   lstate.c    ltm.c      lvm.c \
+		lcode.c     ldo.c       liolib.c  lobject.c   lstring.c   lua.c      lzio.c")
+
+-- liblua.a
+SetTarget.A("liblua.a","lapi.o      lcorolib.o  ldump.o   llex.o      lopcodes.o  lstrlib.o \
+			lauxlib.o   lctype.o    lfunc.o   lmathlib.o  loslib.o    ltable.o   lundump.o \
+			lbaselib.o  ldblib.o    lgc.o     lmem.o      lparser.o   ltablib.o  lutf8lib.o \
+			lbitlib.o   ldebug.o    linit.o   loadlib.o   lstate.o    ltm.o      lvm.o \
+			lcode.o     ldo.o       liolib.o  lobject.o   lstring.o   lzio.o")
+
+-- lua
+SetTarget.OUT("lua","lua.o liblua.a")
+
+-- luac
+SetTarget.OUT("luac","luac.o liblua.a")
+
 
 ```
 ### Execute
@@ -44,9 +59,14 @@ SetFlags(str)
 AddLib(str)
 ```
 
-### Add file to compile
+### Add a file to compile
 ```Lua
 AddFile(str)
+```
+
+### Add files to compile
+```
+AddFiles(str)
 ```
 
 ### Set final target
