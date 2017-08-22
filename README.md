@@ -21,6 +21,11 @@ SetTarget.OUT("main","main.o file1.o file2.o")
 
 ```
 
+```Shell
+$ quickmake make.lua  # generate Makefile
+$ make
+```
+
 ## Instruction
 
 ### Set compiler 
