@@ -153,7 +153,7 @@ function SetTarget.OUT(target,depend)
 end
 
 function SetTarget.SO(target,depend)
-	local cmd = compiler .. flags .. "-o " .. target .. " " .. depend
+	local cmd = compiler .. flags .. "-shared -o " .. target .. " " .. depend
 	local rule = {target = target, depend = depend, cmd = cmd,ttype = TARGET.SO}
 	table.insert(rules,rule)
 end
