@@ -57,7 +57,7 @@ SetTarget.OUT(target,depend)
 -- target is shared object(.so)
 SetTarget.SO(target,depend)
 
--- target is static library(.s)
+-- target is static library(.a)
 SetTarget.A(target,depend) 
 ```
 
