@@ -65,7 +65,7 @@ AddFile(str)
 ```
 
 ### Add files to compile
-```
+```Lua
 AddFiles(str)
 ```
 
