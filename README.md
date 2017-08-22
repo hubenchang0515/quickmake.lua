@@ -2,6 +2,7 @@
 A simple script of Lua used to generate Makefile
 
 ## Demo 
+### Script make.lua
 ```Lua
 -- filename : make.lua
 SetCompiler("clang++")
@@ -20,7 +21,7 @@ AddFile("file2.cpp")
 SetTarget.OUT("main","main.o file1.o file2.o")
 
 ```
-
+### Execute
 ```Shell
 $ quickmake make.lua  # generate Makefile
 $ make
