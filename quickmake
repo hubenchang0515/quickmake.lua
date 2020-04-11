@@ -126,7 +126,7 @@ function buildMakefile()
 	
 	-- compile .c .cpp to .o
 	for i,file in pairs(files) do
-		local cmd = compiler .. flags .. " -M " .. file
+		local cmd = compiler .. flags .. " -MM " .. file
 		fp = io.popen(cmd)
 		local inc = fp:read("a")
 		if fp:close() then
