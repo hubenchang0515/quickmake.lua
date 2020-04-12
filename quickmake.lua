@@ -132,8 +132,9 @@ function quickmake:init()
 end
 
 -- 输出文件
-function quickmake:output()
-    fp = io.open("Makefile","w")
+function quickmake:output(file)
+    file = file or "Makefile"
+    fp = io.open(file,"w")
     
     -- 伪目标
     fp:write(".PHONY: all clean\n\n")
