@@ -3,81 +3,70 @@ A simple script of Lua used to generate Makefile
 
 ## Demo : Generate Makeifle for Lua
 ### Script make.lua
-```Lua
+```lua
+#! /usr/bin/env lua
 
--- Set compiler and flags
-SetCompiler("gcc")
-SetFlags("-O2 -W -Wall -fPIC -DLUA_USE_LINUX")
+-- 导入
+qm = require("quickmake")
 
--- link libreadline libm and libdl
-AddLib("readline")
-AddLib("m")
-AddLib("dl")
+-- 源文件列表
+sourceFiles = {"lapi.c","lcorolib.c", "ldump.c", "llex.c", "lopcodes.c", "lstrlib.c", "luac.c",
+		"lauxlib.c", "lctype.c", "lfunc.c", "lmathlib.c", "loslib.c", "ltable.c", "lundump.c",
+		"lbaselib.c", "ldblib.c", "lgc.c", "lmem.c", "lparser.c", "ltablib.c", "lutf8lib.c",
+		"lbitlib.c", "ldebug.c", "linit.c", "loadlib.c", "lstate.c", "ltm.c", "lvm.c",
+		"lcode.c", "ldo.c", "liolib.c", "lobject.c", "lstring.c", "lua.c", "lzio.c"}
+        
+-- 库文件依赖列表
+libDependFiles = {"lapi.o", "lcorolib.o", "ldump.o", "llex.o", "lopcodes.o", "lstrlib.o",
+			"lauxlib.o", "lctype.o", "lfunc.o", "lmathlib.o", "loslib.o", "ltable.o", "lundump.o",
+			"lbaselib.o", "ldblib.o", "lgc.o", "lmem.o", "lparser.o", "ltablib.o", "lutf8lib.o",
+			"lbitlib.o", "ldebug.o", "linit.o", "loadlib.o", "lstate.o", "ltm.o", "lvm.o",
+			"lcode.o", "ldo.o", "liolib.o", "lobject.o", "lstring.o", "lzio.o"}
 
--- files
-AddFiles("lapi.c      lcorolib.c  ldump.c   llex.c      lopcodes.c  lstrlib.c  luac.c \
-		lauxlib.c   lctype.c    lfunc.c   lmathlib.c  loslib.c    ltable.c   lundump.c \
-		lbaselib.c  ldblib.c    lgc.c     lmem.c      lparser.c   ltablib.c  lutf8lib.c \
-		lbitlib.c   ldebug.c    linit.c   loadlib.c   lstate.c    ltm.c      lvm.c \
-		lcode.c     ldo.c       liolib.c  lobject.c   lstring.c   lua.c      lzio.c")
+-- 初始化并设置编译器及选项
+qm:init()
+qm:setCompiler("gcc")
+qm:setCompileFlags("-O2 -W -Wall -fPIC")
+qm:setLinkFlags("-llua -L.")
 
--- liblua.a
-SetTarget.A("liblua.a","lapi.o      lcorolib.o  ldump.o   llex.o      lopcodes.o  lstrlib.o \
-			lauxlib.o   lctype.o    lfunc.o   lmathlib.o  loslib.o    ltable.o   lundump.o \
-			lbaselib.o  ldblib.o    lgc.o     lmem.o      lparser.o   ltablib.o  lutf8lib.o \
-			lbitlib.o   ldebug.o    linit.o   loadlib.o   lstate.o    ltm.o      lvm.o \
-			lcode.o     ldo.o       liolib.o  lobject.o   lstring.o   lzio.o")
+-- 设置源文件
+qm:setSource(sourceFiles)
 
--- lua
-SetTarget.OUT("lua","lua.o liblua.a")
+-- 添加静态库目标
+qm:addATarget("liblua.a", libDependFiles)
 
--- luac
-SetTarget.OUT("luac","luac.o liblua.a")
+-- 添加可执行文件目标
+qm:addOutTarget("lua", {"lua.o", "liblua.a"})
+qm:addOutTarget("luac", {"luac.o", "liblua.a"})
 
+-- 输出Makefile
+qm:output()
 
 ```
+
 ### Execute
-```Shell
-$ quickmake make.lua 
-$ make
+```bash
+./make.lua
+make
 ```
 
-## Instruction
-
-### Set compiler 
+## APIs
 ```Lua
-SetCompiler(str)
-```
- 
-### Set compiler's flags
-```Lua
-SetFlags(str)
-```
- 
-### Add library to link  
-```Lua
-AddLib(str)
-```
+quickmake:init()
 
-### Add a file to compile
-```Lua
-AddFile(str)
+quickmake:output(file="Makefile")
+
+quickmake:setCompiler(compiler)
+
+quickmake:setCompileFlags(flags)
+
+quickmake:setLinkFlags(flags)
+
+quickmake:setSource(files)
+
+quickmake:addATarget(target, files)
+
+quickmake:addSoTarget(target, files)
+
+quickmake:addOutTarget(target, files)
 ```
-
-### Add files to compile
-```Lua
-AddFiles(str)
-```
-
-### Set final target
-```Lua
--- target is executable file(.out)
-SetTarget.OUT(target,depend)
-
--- target is shared object(.so)
-SetTarget.SO(target,depend)
-
--- target is static library(.a)
-SetTarget.A(target,depend) 
-```
-
