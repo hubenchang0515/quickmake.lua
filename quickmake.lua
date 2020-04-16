@@ -107,7 +107,7 @@ local function makeOutTargetRule(target, files, compiler, flags)
     local filesString = list2string(files)
     
     local depend = string.format("%s: %s\n", target, filesString)
-    local cmd = string.format("\t%s %s -o %s %s\n", compiler, flags, target, filesString)
+    local cmd = string.format("\t%s -o %s %s %s\n", compiler, target, filesString, flags)
     local rule = depend .. cmd
     
     return rule
