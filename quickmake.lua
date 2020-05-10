@@ -169,14 +169,15 @@ function quickmake:output(file)
     
     -- 动态库
     for target, files in pairs(self.SO_TARGET) do
-        local rule = makeSoTargetRule(target, files, self.compiler, self.compile_flags)
+        local flags = self.compile_flags .. ' ' .. self.link_flags
+        local rule = makeSoTargetRule(target, files, self.compiler, flags)
         fp:write(rule, "\n")
         print(rule)
     end
     
     -- 源文件
     for i, file in ipairs(self.SOURCE) do
-        rule = makeSourceRule(file, self.compiler, self.compile_flags)
+        local rule = makeSourceRule(file, self.compiler, self.compile_flags)
         fp:write(rule, "\n")
         print(rule)
     end
